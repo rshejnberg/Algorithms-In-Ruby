@@ -1,0 +1,221 @@
+randomTenNumbers = []
+randomHundredNumbers = []
+randomThousandNumbers = []
+reverseTenNumbers = []
+reverseHundredNumbers = []
+reverseThousandNumbers = []
+sortedTenNumbers = []
+sortedHundredNumbers = []
+sortedThousandNumbers = []
+$comparisons = 0
+$operations = 0
+#Sorting Methods
+def insertion_sort(list)
+  $comparisons = 0
+  $operations = 0
+    list[1..list.length-1].each_with_index do |item, index|
+      key = item
+      j = index-1
+      while j>= 0 && key<list[j] do
+        list[j+1] = list[j]
+        j -= 1
+        $operations += 1
+        $comparisons += 1
+      end
+      list[j+1] = key 
+      $operations += 1   
+    end
+  list
+end
+def merge_sort(list)
+  return list if list.size < 2
+  left = list[0, list.length/2]
+  right = list[list.length/2, list.length]
+  $operations += 4
+  merge(merge_sort(left), merge_sort(right))
+
+end
+def merge(left, right)
+  ordered_list = []
+  until left.empty? || right.empty?
+    ordered_list << (left[0] <= right[0] ? left.shift : right.shift)
+    $comparisons += 1
+    $operations += 2
+  end
+  ordered_list.concat(left).concat(right)
+end
+def quick_sort(list)
+
+  left_array = []
+  right_array = []
+  sorted_list = list.clone
+  $operations += 1
+  return sorted_list if sorted_list.size <= 1
+  pivot = sorted_list.pop
+  $operations += 1
+  sorted_list.each_with_index do |li, index|
+    $comparisons += 1
+    if li < pivot 
+      left_array.push li
+      $operations += 1
+    else 
+      right_array.push li
+      $operations += 1
+    end
+  end
+  sorted_elems = 0 
+  sorted_list[1..list.size].each_with_index do |li, index|
+     if sorted_list[index] > sorted_list[index-1]
+       sorted_elems += 1
+     end
+  end
+  quick_sort(left_array) + [pivot] + quick_sort(right_array)
+end
+
+#General Purpose Methods
+
+def create_arrays(randomTenNumbers, randomHundredNumbers, randomThousandNumbers, reverseTenNumbers, reverseHundredNumbers, reverseThousandNumbers, sortedTenNumbers, sortedHundredNumbers, sortedThousandNumbers)
+  File.foreach("10_Random.txt") {|x| randomTenNumbers.push(x)}
+  File.foreach("100_Random.txt") {|x| randomHundredNumbers.push(x)}
+  File.foreach("1000_Random.txt") {|x| randomThousandNumbers.push(x)}
+  File.foreach("10_Reverse.txt") {|x| reverseTenNumbers.push(x)}
+  File.foreach("100_Reverse.txt") {|x| reverseHundredNumbers.push(x)}
+  File.foreach("1000_Reverse.txt") {|x| reverseThousandNumbers.push(x)}
+  File.foreach("10_Sorted.txt") {|x| sortedTenNumbers.push(x)}
+  File.foreach("100_Sorted.txt") {|x| sortedHundredNumbers.push(x)}
+  File.foreach("1000_Sorted.txt") {|x| sortedThousandNumbers.push(x)}
+end
+def print_sorted_array(list, sort_type)
+  list = array_to_i(format_list(chomp_list(list)))
+  $comparisons = 0 
+  $operations = 0
+  if sort_type == 'insertion_sort'
+    sorted_list = insertion_sort(list)
+  elsif sort_type == 'merge_sort'
+    sorted_list = merge_sort(list)
+  elsif sort_type == 'quick_sort'
+    sorted_list = quick_sort(list)
+  end
+  
+  p unformat_list(sorted_list)
+  p $operations.to_s  + " operations performed"
+  p $comparisons.to_s  + " comparisons performed"
+end
+def chomp_list(sorted_list)
+  chomped_list = []
+  sorted_list.each do |li|
+    li = li.chomp
+    chomped_list.push li
+  end
+  chomped_list
+end
+def array_to_i(list)
+  list.each do |li|
+    li = li.to_i
+  end
+  list
+end
+def print_array(list) 
+  list.each do |li|
+    p li
+  end
+end
+def get_longest_number(list)
+  longest = list[0]
+  list[1..list.size].each_with_index do |li, index|
+     if list[index].size > list[index-1].size
+       longest = li
+     end
+  end
+  longest.size
+end
+def format_list(list)
+
+  longest = get_longest_number(list)
+  formatted_list = []
+  list.each do |li|
+
+    if li.size != longest.size
+      zeros = longest - li.size
+      if zeros > 0 
+        li = '0' * zeros + li
+        li
+      end
+    end 
+    formatted_list.push li
+  end
+  formatted_list
+end
+def unformat_list(list)
+  unformatted_list = []
+  list.each do |li|
+    unformatted_list.push li.to_i
+  end
+  unformatted_list
+end
+def menu(randomTenNumbers, randomHundredNumbers, randomThousandNumbers, reverseTenNumbers, reverseHundredNumbers, reverseThousandNumbers, sortedTenNumbers, sortedHundredNumbers, sortedThousandNumbers)
+  create_arrays(randomTenNumbers, randomHundredNumbers, randomThousandNumbers, reverseTenNumbers, reverseHundredNumbers, reverseThousandNumbers, sortedTenNumbers, sortedHundredNumbers, sortedThousandNumbers)
+  size = 0
+  algorithm = 0
+  order = 0
+  begin
+    p "Which size array would you like to use?"
+    p "1. 10"
+    p "2. 100"
+    p "3. 1000"
+    size = $stdin.gets.chomp.to_i
+    p size
+  end while size < 0 || size > 4
+  begin
+    p "Which algorithm would you like to use to sort the array?"
+    p "1. Insertion Sort"
+    p "2. Merge Sort"
+    p "3. Quick Sort"
+    algorithm = $stdin.gets.chomp.to_i
+  end while algorithm < 0 || algorithm > 4
+  begin
+    p "Which algorithm would you like to use to sort the array?"
+    p "1. Random"
+    p "2. Reverse"
+    p "3. Sorted"
+    order = $stdin.gets.chomp.to_i
+  end while order < 0 || order > 4
+  
+  if size == 1 
+    if order == 1 
+      array = randomTenNumbers
+    elsif order == 2 
+      array = reverseTenNumbers
+    else 
+      array = sortedTenNumbers
+    end
+  elsif size == 2
+    if order == 1 
+      array = randomHundredNumbers
+    elsif order == 2 
+      array = reverseHundredNumbers
+    else 
+      array = sortedHundredNumbers
+    end
+  else
+    if order == 1 
+      array = randomThousandNumbers
+    elsif order == 2 
+      array = reverseThousandNumbers
+    else 
+      array = sortedThousandNumbers
+    end
+  end
+  if algorithm == 1 
+    algorithm = "insertion_sort"
+  elsif algorithm == 2 
+    algorithm = "merge_sort"
+  else 
+    algorithm = "quick_sort" 
+  end
+
+    print_sorted_array(array, algorithm)
+end
+
+menu(randomTenNumbers, randomHundredNumbers, randomThousandNumbers, reverseTenNumbers, reverseHundredNumbers, reverseThousandNumbers, sortedTenNumbers, sortedHundredNumbers, sortedThousandNumbers)
+
